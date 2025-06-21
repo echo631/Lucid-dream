@@ -1,0 +1,183 @@
+
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alboma Doğru</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap');
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Georgia', serif;
+      background: black;
+      color: white;
+      overflow: hidden;
+    }
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+    .hidden { display: none; }
+    .question, .intro, .result {
+      max-width: 80%;
+      margin: 20px auto;
+      text-align: center;
+      backdrop-filter: blur(6px);
+      padding: 20px;
+      border-radius: 10px;
+    }
+    input[type="text"] {
+      padding: 10px;
+      width: 60%;
+      margin: 10px 0;
+      border: 1px solid white;
+      background: transparent;
+      color: white;
+      text-align: center;
+    }
+    button {
+      background-color: transparent;
+      border: 1px solid white;
+      color: white;
+      padding: 10px 20px;
+      margin: 10px;
+      cursor: pointer;
+      transition: 0.3s, box-shadow 0.3s;
+    }
+    button:hover {
+      background-color: white;
+      color: black;
+      box-shadow: 0 0 10px white;
+    }
+    .deco-font {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5em;
+      opacity: 0;
+      animation: fadeIn 3s forwards;
+    }
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="stars"></canvas>
+  <audio id="bgm" autoplay loop>
+    <source src="BlackButterfly.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="intro">
+    <h2 class="deco-font">Bəzən göy rəng sakit görünür.<br>Amma içində boğulmaq mümkündür.</h2>
+    <p class="deco-font">Yeni albom yoldadır. Hiss etməyə hazırsan?</p>
+    <button onclick="startQuiz()">Başla →</button>
+  </div>
+
+  <div class="question hidden" id="q1">
+    <h3>Depressiyanın simvolu hansı rəngdir?</h3>
+    <input type="text" id="answer1" placeholder="Cavabı yaz...">
+    <br>
+    <button onclick="checkAnswer('answer1', 'göy', 'q1', 'q2')">Təsdiqlə</button>
+  </div>
+
+  <div class="question hidden" id="q2">
+    <h3>Eilish No.2 ətrinin çıxış tarixi?</h3>
+    <input type="text" id="answer2" placeholder="Cavabı yaz...">
+    <br>
+    <button onclick="checkAnswer('answer2', '18.11', 'q2', 'q3')">Təsdiqlə</button>
+  </div>
+
+  <div class="question hidden" id="q3">
+    <h3>"underWater" single-da bəhs edilən şəxsin həyatımdakı rolu?</h3>
+    <input type="text" id="answer3" placeholder="Cavabı yaz...">
+    <br>
+    <button onclick="checkAnswer('answer3', 'stalker', 'q3', 'q4')">Təsdiqlə</button>
+  </div>
+
+  <div class="question hidden" id="q4">
+    <h3>"hear something" single-ın əsl çıxış tarixi?</h3>
+    <input type="text" id="answer4" placeholder="Cavabı yaz...">
+    <br>
+    <button onclick="checkAnswer('answer4', '14.02', 'q4', 'q5')">Təsdiqlə</button>
+  </div>
+
+  <div class="question hidden" id="q5">
+    <h3>Yayımlanmamış ilk albomumun adı?</h3>
+    <input type="text" id="answer5" placeholder="Cavabı yaz...">
+    <br>
+    <button onclick="checkAnswer('answer5', 'me & them', 'q5', 'result')">Təsdiqlə</button>
+  </div>
+
+  <div class="result hidden" id="result">
+    <h2 class="deco-font">Artıq sən də bir az hiss etdin.</h2>
+    <p class="deco-font">Bu sadəcə başlanğıcdır. Albom çox yaxında.</p>
+  </div>
+
+  <script>
+    const bgm = document.getElementById('bgm');
+    bgm.volume = 0;
+    const fadeAudio = setInterval(() => {
+      if (bgm.volume < 1.0) {
+        bgm.volume = Math.min(bgm.volume + 0.01, 1.0);
+      } else {
+        clearInterval(fadeAudio);
+      }
+    }, 200);
+
+    const canvas = document.getElementById('stars');
+    const ctx = canvas.getContext('2d');
+    let w = canvas.width = window.innerWidth;
+    let h = canvas.height = window.innerHeight;
+    let stars = Array(200).fill().map(() => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      r: Math.random() * 1.5
+    }));
+    function drawStars() {
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = 'white';
+      stars.forEach(s => {
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      moveStars();
+      requestAnimationFrame(drawStars);
+    }
+    function moveStars() {
+      stars.forEach(s => {
+        s.y += 0.2;
+        if (s.y > h) {
+          s.y = 0;
+          s.x = Math.random() * w;
+        }
+      });
+    }
+    drawStars();
+    window.onresize = () => {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    };
+
+    function startQuiz() {
+      document.querySelector('.intro').classList.add('hidden');
+      document.getElementById('q1').classList.remove('hidden');
+    }
+
+    function checkAnswer(inputId, correct, currentId, nextId) {
+      const input = document.getElementById(inputId);
+      if (input.value.trim().toLowerCase() === correct.toLowerCase()) {
+        input.style.borderColor = 'white';
+        document.getElementById(currentId).classList.add('hidden');
+        document.getElementById(nextId).classList.remove('hidden');
+      } else {
+        input.style.borderColor = 'red';
+      }
+    }
+  </script>
+</body>
+</html>
+    
